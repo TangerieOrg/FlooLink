@@ -1,0 +1,17 @@
+version: '3'
+services:
+  web:
+    image: ${IMAGE_NAME}/web:latest
+    deploy:
+      replicas: 1
+      labels:
+        xyz.tangerie.reverse_proxy.path: "/"
+        xyz.tangerie.reverse_proxy.port: "3000"
+        xyz.tangerie.reverse_proxy.server_name: "floolink.tangerie.xyz"
+    networks:
+      - nginx-proxy-overlay
+
+networks:
+  nginx-proxy-overlay:
+    external: true
+    driver: overlay

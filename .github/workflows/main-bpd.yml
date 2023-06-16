@@ -1,0 +1,28 @@
+name: Docker Build, Push & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    uses: TangerieOrg/Workflows/.github/workflows/docker-build-push.yml@main
+    with:
+      image_name: floo-link/web
+      registry_name: docker.tangerie.xyz
+      ref: main
+      path: web
+      force_build: 'true'
+    secrets: inherit
+
+    
+  deploy:
+    uses: TangerieOrg/Workflows/.github/workflows/docker-deploy.yml@main
+    needs: 
+      - build-web
+    with:
+      image_name: floo-link
+      registry_name: docker.tangerie.xyz
+      
+    secrets: inherit
