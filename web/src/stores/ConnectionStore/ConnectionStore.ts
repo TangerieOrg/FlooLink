@@ -1,21 +1,20 @@
 import { createStore, createUseStore } from "@tangerie/better-global-store"
 import { io } from "socket.io-client";
 import { ConnectionInitOptions, ConnectionState, ConnectionStatus } from "./types";
-import { defaults } from "lodash";
 import type { ConnectSocket } from "./SocketEventMap";
 import setupSocket from "./SetupSocket";
 import { useEffect } from "preact/hooks";
+import { isDebugMode } from "../../Config";
 
-const createSocket = ({host, path, port } : ConnectionInitOptions) : ConnectSocket => {
-    return io(host, {
+const createSocket = ({url, path } : ConnectionInitOptions) : ConnectSocket => {
+    return io(url, {
         path,
-        autoConnect: false,
-        port
+        autoConnect: false
     });
 }
 
 const createDefaultOpts = () : ConnectionInitOptions => ({
-    host: "/",
+    url: "/",
     path: "/server/socket.io"
 })
 
@@ -25,10 +24,8 @@ export const getSocket = () => socket;
 
 const initial : ConnectionState = {
     status: ConnectionStatus.Ready,
-    opts: {
-        host: "/",
-        path: "/server/socket.io"
-    }
+    opts: createDefaultOpts(),
+    members: []
 }
 
 export const ConnectionStore = createStore({
@@ -36,9 +33,11 @@ export const ConnectionStore = createStore({
     actions: {
         connect(state, opts : Partial<ConnectionInitOptions>) {
             if(state.status === "Connected" || state.status === "Connecting") {
-                throw new Error("Socket already connected");
+                console.error("Socket already connected");
+                return;
             }
-            state.opts = defaults(createDefaultOpts(), opts);
+            state.opts = Object.assign(createDefaultOpts(), opts);
+            if(isDebugMode) console.log("Connecting to", state.opts);
             state.status = ConnectionStatus.Connecting;
             socket = createSocket(state.opts);
 
@@ -48,9 +47,11 @@ export const ConnectionStore = createStore({
         },
         disconnect(state) {
             if(state.status === "Disconnected" || state.status === "Failed" || state.status === "Ready") {
-                throw new Error("Socket already disconnected");
+                console.error("Socket already disconnected");
+                return;
             }
             state.status = ConnectionStatus.Ready;
+            state.members = [];
             getSocket()?.disconnect();
             socket = undefined;
         }

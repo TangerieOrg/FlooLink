@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import router from "./routes";
 import { setupSocket } from "./socket/setup";
+import { setupManager } from "./socket/manager";
 
 const app = express();
 const server = createServer(app);
@@ -53,6 +54,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     }
 })
 
-io.on("connection", setupSocket)
+io.on("connection", setupSocket);
+
+setupManager(io);
 
 export { io, server, app };

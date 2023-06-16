@@ -1,5 +1,5 @@
 import { createStore, createUseStore } from "@tangerie/better-global-store"
-import { pick } from "lodash";
+import { isEqual, pick } from "lodash";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "preact/hooks";
 
@@ -47,7 +47,7 @@ export const URLStore = createStore({
             state.query = getObjectFromURL(query);
         }
     }
-});
+}, { compare: isEqual });
 
 export const useURLStore = createUseStore(URLStore);
 export const useURLStoreUpdater = () => useOnQueryChanged((pathname, query) => {

@@ -10,12 +10,18 @@ export const ConnectionStatus = {
 export type ConnectionStatus = typeof ConnectionStatus[keyof typeof ConnectionStatus];
 
 export interface ConnectionInitOptions {
-    host : string;
+    url : string;
     path : string;
-    port? : number;
+}
+
+export interface SocketData {
+    id : string; // Replace with auth token
 }
 
 export interface ConnectionState {
     status : ConnectionStatus;
     opts : ConnectionInitOptions;
+    data?: SocketData;
+    members: string[];
 }
+
