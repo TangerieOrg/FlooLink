@@ -1,4 +1,4 @@
-# FlooLink
+# [FlooLink](https://floolink.tangerie.xyz/)
 
 Proximity voice chat for Hogwarts Legacy multiplayer (HogWarp)
 

@@ -1,5 +1,16 @@
 version: '3'
 services:
+  server:
+    image: ${IMAGE_NAME}/server:latest
+    deploy:
+      replicas: 1
+      labels:
+        xyz.tangerie.reverse_proxy.path: "/server"
+        xyz.tangerie.reverse_proxy.port: "80"
+        xyz.tangerie.reverse_proxy.server_name: "floolink.tangerie.xyz"
+    networks:
+      - nginx-proxy-overlay
+
   web:
     image: ${IMAGE_NAME}/web:latest
     deploy:

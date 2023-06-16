@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "start": "parcel public/index.html",
+    "start": "parcel --port 1234 --hmr-port 1236 public/index.html",
     "clean-start": "npm run clean && npm start",
     "build": "parcel build --public-url './' public/index.html",
     "postbuild": "workbox generateSW",
@@ -49,14 +49,16 @@
     "react-spinners": "^0.13.8",
     "react-type-animation": "^3.0.1",
     "rimraf": "^3.0.2",
+    "socket.io-client": "^4.6.2",
     "tailwindcss": "^3.1.8",
     "tailwindcss-animate": "^1.0.5"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.185",
     "@parcel/resolver-glob": "^2.8.3",
     "@parcel/transformer-inline-string": "^2.8.3",
     "@parcel/transformer-less": "^2.8.3",
+    "@types/lodash": "^4.14.185",
+    "@types/socket.io-client": "^3.0.0",
     "buffer": "^5.7.1",
     "cross-env": "^7.0.3",
     "crypto-browserify": "^3.12.0",
