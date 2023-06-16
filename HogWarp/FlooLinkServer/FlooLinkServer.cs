@@ -2,22 +2,37 @@
 using HogWarp.Lib.Game;
 using HogWarp.Lib.System;
 using Buffer = HogWarp.Lib.System.Buffer;
-using SocketIOSharp.Server;
-using EngineIOSharp.Common.Enum;
-using SocketIOSharp.Client;
-using SocketIOSharp.Common;
+using WebSocketSharp;
+using WebSocketSharp.Server;
+
 
 namespace FlooLink
 {
+    public class Echo : WebSocketBehavior
+    {
+        protected override void OnOpen () {
+            FlooLinkPlugin._server!.Information($"Connection Opened");
+        }
+        protected override void OnClose (CloseEventArgs e) {
+            FlooLinkPlugin._server!.Information($"Connection Closed");
+        }
+
+        protected override void OnMessage (MessageEventArgs e)
+        {
+            Send (e.Data);
+            FlooLinkPlugin._server!.Information($"[MSG] {e.Data}");
+        }
+    }
+
     public class FlooLinkPlugin : IPluginBase
     {
         public string Name => "FlooLink";
 
         public string Description => "Proximity Chat";
 
-        private Server? _server;
+        public static Server? _server;
 
-        private SocketIOServer? io;
+        private WebSocketServer? wsServer;
 
         public void Initialize(Server server)
         {
@@ -27,29 +42,32 @@ namespace FlooLink
             _server.PlayerJoinEvent += PlayerJoin;
             _server.RegisterMessageHandler(Name, HandleMessage);
 
-            io = new SocketIOServer(new SocketIOServerOption(8081));
+            wsServer = new WebSocketServer(8081);
+            wsServer.AddWebSocketService<Echo> ("/echo");
+            // io = new SocketIOServer(new SocketIOServerOption(8081));
 
-            io.OnConnection((socket) =>
-            {
-                _server!.Information($"Client Connected");
+            // io.OnConnection((socket) =>
+            // {
+            //     _server!.Information($"Client Connected");
 
-                // socket.On("input", (Data) =>
-                // {
-                //     foreach (JToken Token in Data)
-                //     {
-                //     Console.Write(Token + " ");
-                //     }
+            //     // socket.On("input", (Data) =>
+            //     // {
+            //     //     foreach (JToken Token in Data)
+            //     //     {
+            //     //     Console.Write(Token + " ");
+            //     //     }
 
-                //     Console.WriteLine();
-                //     socket.Emit("echo", Data);
-                // });
+            //     //     Console.WriteLine();
+            //     //     socket.Emit("echo", Data);
+            //     // });
 
-                socket.On(SocketIOEvent.DISCONNECT, () =>
-                {
-                    _server!.Information("Client disconnected");
-                });
-            });
-            Task.Run(() => io.Start());
+            //     socket.On(SocketIOEvent.DISCONNECT, () =>
+            //     {
+            //         _server!.Information("Client disconnected");
+            //     });
+            // });
+            // Task.Run(() => io.Start());
+            wsServer.Start();
             _server!.Information("FlooLink Initialized");
         }
 
@@ -65,7 +83,6 @@ namespace FlooLink
         public void PlayerJoin(Player player)
         {
             _server!.Information("Player joined!");
-
             SendPing(player, 0);
         }
 
