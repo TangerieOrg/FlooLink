@@ -1,0 +1,1 @@
+export const isDebugMode = process.env.NODE_ENV === "development" || window.localStorage.getItem("debug") === "true";

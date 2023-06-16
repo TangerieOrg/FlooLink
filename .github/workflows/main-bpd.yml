@@ -13,7 +13,6 @@ jobs:
       registry_name: docker.tangerie.xyz
       ref: main
       path: server
-      force_build: 'true'
     secrets: inherit
 
   build-web:
