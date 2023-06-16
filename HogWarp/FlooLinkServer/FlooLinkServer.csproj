@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>Assembly-Plugin</AssemblyName>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<BaseOutputPath>..\bin</BaseOutputPath>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="bin\**" />
+		<EmbeddedResource Remove="bin\**" />
+		<None Remove="bin\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3">
+			<IncludeAssets>all</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="SocketIOSharp" Version="2.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="HogWarp.Lib">
+	    <HintPath>..\dlls\HogWarp.Lib.dll</HintPath>
+	  </Reference>
+	  <Reference Include="HogWarp.Loader">
+	    <HintPath>..\dlls\HogWarp.Loader.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Newtonsoft.Json">
+	    <HintPath>..\dlls\Newtonsoft.Json.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Serilog">
+	    <HintPath>..\dlls\Serilog.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Serilog.Sinks.Console">
+	    <HintPath>..\dlls\Serilog.Sinks.Console.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Serilog.Sinks.File">
+	    <HintPath>..\dlls\Serilog.Sinks.File.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+
+</Project>
