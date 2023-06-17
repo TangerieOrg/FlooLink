@@ -1,3 +1,4 @@
+import { createInitiatorPeer } from "@modules/PeerUtils";
 import { ConnectionStatus, ServerInitOptions, ServerStore, useServerStore } from "@stores/ServerStore";
 import { URLStore, useURLStore } from "@stores/URLStore";
 import { useEffect, useMemo } from "preact/hooks"
@@ -41,6 +42,13 @@ export default function TestPeerRoute() {
         ServerStore.actions.connect(options);
         return () => ServerStore.actions.disconnect();
     }, []);
+
+    // useEffect(() => {
+    //     if(status !== ConnectionStatus.Connected) return;
+    //     if(options.playerId === "tangerie") {
+    //         createInitiatorPeer();
+    //     }
+    // }, [status]);
 
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Peer Test: {status}</h1>

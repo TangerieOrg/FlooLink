@@ -1,22 +1,24 @@
-import { cloneDeep } from "lodash";
 import { ConnectionStatus, ServerInitOptions, ServerMessageType } from "./types";
-import { StoreSet, createStore, createUseStore } from "@tangerie/better-global-store";
+import { createStore, createUseStore } from "@tangerie/better-global-store";
 import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
+import SimplePeer from "simple-peer";
 
 interface State {
     status: ConnectionStatus;
-    users: Set<string>;
+    users: Map<number, string>;
     opts: ServerInitOptions;
+    peers: Map<string, SimplePeer.SimplePeer>;
 }
 
 const initial  = () : State => ({
     status: ConnectionStatus.Ready,
-    users: new Set(),
+    users: new Map(),
     opts: {
         playerId: "",
         url: ""
-    }
+    },
+    peers: new Map()
 })
 
 let ws : WebSocket | undefined = undefined;
@@ -47,10 +49,6 @@ export const ServerStore = createStore({
             setupSocket();
         },
         disconnect(state) {
-            if(state.status === "Disconnected" || state.status === "Failed" || state.status === "Ready") {
-                console.error("Socket already disconnected");
-                return;
-            }
             // Dont clear options in case of reconnect
             state.status = ConnectionStatus.Ready;
             state.users.clear();
@@ -60,27 +58,38 @@ export const ServerStore = createStore({
     }
 })
 
-const { get, set } = ServerStore;
+
+const { get, set, actions } = ServerStore;
+
+
+// For setting the status from the socket events
+// Keep it as not an action because we want it to be private
+const updateStatus = (status : ConnectionStatus) => set(state => {
+    // If it failed, the disconnect event will also fire
+    if(!(state.status === ConnectionStatus.Failed && status === ConnectionStatus.Disconnected)) {
+        state.status = status;
+    }
+    // If we are connecting, dont clear data
+    if(status === ConnectionStatus.Connecting || status === ConnectionStatus.Connected) return;
+    
+    state.users.clear();
+    state.peers.clear();
+});
+
 
 const setupSocket = () => {
-    const statusSetter = (status : ConnectionStatus) => () => set(state => {
-        if(status !== ConnectionStatus.Connecting && status !== ConnectionStatus.Connected) {
-            state.users.clear();
-        }
-        if(get().status === ConnectionStatus.Failed) return;
-        state.status = status;
-    })
+    const socket = ws!;
     if(isDebugMode) {
         const socketLog = console.log.bind(console, "[SERVER]")
-        ws!.addEventListener("open", () => socketLog("OPEN"));
-        ws!.addEventListener("error", socketLog.bind(null, "ERR"))
-        ws!.addEventListener("close", () => socketLog("CLOSE"))
+        socket.addEventListener("open", () => socketLog("OPEN"));
+        socket.addEventListener("error", socketLog.bind(null, "ERR"))
+        socket.addEventListener("close", () => socketLog("CLOSE"))
     }
-    ws!.addEventListener("open", statusSetter(ConnectionStatus.Connected));
-    ws!.addEventListener("error", statusSetter(ConnectionStatus.Failed));
-    ws!.addEventListener("close", statusSetter(ConnectionStatus.Disconnected));
+    socket.addEventListener("open", () => updateStatus(ConnectionStatus.Connected));
+    socket.addEventListener("error", () => updateStatus(ConnectionStatus.Failed));
+    socket.addEventListener("close", () => updateStatus(ConnectionStatus.Disconnected));
 
-    ws!.addEventListener("message", async (ev) => {
+    socket.addEventListener("message", async (ev) => {
         handleMessage(
             new Uint8Array(await (ev.data as Blob).arrayBuffer())
         )
@@ -100,24 +109,40 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
         console.log(decoder.decode(data));
     },
     [ServerMessageType.PlayerList]: data => {
+        // createInitiatorPeer for each player
         const players = toStringArray(data);
         set(state => {
+            state.users.clear();
+            for(const p of players) {
+                state.users.set(p.charCodeAt(0), p.slice(1));
+            }
             // state.users = players;
-            state.users = new Set(players);
+            // state.users = new Set(players.map(x => x.slice(1)));
         })
     },
     [ServerMessageType.PlayerJoin]: data => {
-        const username = decoder.decode(data);
-        if(username == get().opts.playerId) return;
+        // createRecieverPeer for new peer
+
+        // const username = decoder.decode(data);
+        // if(username == get().opts.playerId) return;
         set(state => {
-            state.users.add(username)
+            // state.users.delete(data[0])
+            state.users.set(data[0], decoder.decode(data.slice(1)))
         })
     },
     [ServerMessageType.PlayerLeave]: data => {
-        const username = decoder.decode(data);
+        // Remove peer
         set(state => {
-            state.users.delete(username)
+            state.users.delete(data[0])
         })
+    },
+    [ServerMessageType.Position]: data => {
+        console.log(data);
+    },
+    // Handle receiving returned
+    [ServerMessageType.ReturnSignal]: data => {
+        const payload = decoder.decode(data);
+        console.log("[RETURN SIGNAL]", payload);
     }
 }
 

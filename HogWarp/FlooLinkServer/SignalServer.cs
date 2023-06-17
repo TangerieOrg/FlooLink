@@ -21,8 +21,11 @@ namespace FlooLink
     public class SignalServer : WebSocketBehavior
     {
         public static Map<string, string> UsernameToID = new Map<string, string>();
+        public static Map<byte, string> ShortIDtoUsername = new Map<byte, string>();
+        public static List<byte> freeIds = Enumerable.Range(0,255).Select(i => (byte)i).ToList();
 
         private string username;
+        private byte shortId;
         private Manager manager;
         private Server server;
         protected override void OnOpen () {
@@ -39,51 +42,65 @@ namespace FlooLink
                 return;
             }
             #endif
+            if(freeIds.Count == 0) {
+                Sessions.CloseSession(ID, CloseStatusCode.Normal, "Full");
+                return;
+            }
+            shortId = freeIds[0];
+            freeIds.RemoveAt(0);
+
+            ShortIDtoUsername.Add(shortId, username);
             UsernameToID.Add(username, ID);
+
             manager.playersRequestedJoin.Remove(username);
             manager.playersInVoice.Add(username);
+
             SendCommand(
                 SendMessageType.PlayerList, 
-                MessageHelper.stringEnumerableToBytes(manager.playersInVoice)
+                MessageHelper.createPlayerToNameBytes(manager.playersInVoice, ShortIDtoUsername)
             );
             BroadcastCommand(
                 SendMessageType.PlayerJoin,
-                MessageHelper.stringToBytes(username)
+                MessageHelper.stringToBytes(shortId, username)
             );
             
             // Check if player is on server
-            server.Information($"Connection Opened {ID} {username}");
+            server.Information($"Connection Opened {shortId} {username}");
             // Send(MessageHelper.stringToBytes(SendMessageType.Test, username));
             
         }
 
         protected override void OnClose (CloseEventArgs e) {
-            server.Information($"Connection Closed {ID} {username}");
+            server.Information($"Connection Closed {shortId} {username}");
             BroadcastCommand(
                 SendMessageType.PlayerLeave,
-                MessageHelper.stringToBytes(username)
+                new byte[] { shortId }
             );
             manager.playersInVoice.Remove(username);
             UsernameToID.RemoveReverse(ID);
+            ShortIDtoUsername.RemoveForward(shortId);
+            freeIds.Add(shortId);
         }
 
         protected override void OnError(WebSocketSharp.ErrorEventArgs e)
         {
-            server.Information($"Connection Error {ID} {username}");
+            server.Information($"Connection Error {shortId} {username}");
             BroadcastCommand(
                 SendMessageType.PlayerLeave,
-                MessageHelper.stringToBytes(username)
+                new byte[] { shortId }
             );
             manager.playersInVoice.Remove(username);
             UsernameToID.RemoveReverse(ID);
+            ShortIDtoUsername.RemoveForward(shortId);
+            freeIds.Add(shortId);
         }
 
         protected override void OnMessage (MessageEventArgs e)
         {
-            // No messages need to be recieved rn
             #if DEBUG
-            server.Information($"[MSG - {ID} {username}] {e.Data}");
+            server.Information($"[MSG - {shortId} {username}] {e.Data}");
             #endif
+            // Handle signalling
         }
 
         private void SendCommand(SendMessageType cmd, byte[] data) {

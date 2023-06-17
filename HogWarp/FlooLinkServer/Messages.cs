@@ -7,11 +7,15 @@ namespace FlooLink
         Test = 0,
         PlayerList = 1,
         PlayerJoin = 2,
-        PlayerLeave = 3
+        PlayerLeave = 3,
+        Position = 4,
+        ReturnSignal = 5
     }
 
     public enum RecieveMessageType : byte {
-        Test = 0
+        Test = 0,
+        SendSignal = 1,
+        ReturnSignal = 2
     }
 
     public static class MessageHelper {
@@ -20,6 +24,13 @@ namespace FlooLink
 
         public static byte[] stringToBytes(string str) {
             return Encoding.ASCII.GetBytes(str);
+        }
+
+        public static byte[] stringToBytes(byte existing, string str) {
+            byte[] final = new byte[1 + Encoding.ASCII.GetByteCount(str)];
+            final[0] = existing;
+            stringToBytes(str).CopyTo(final, 1);
+            return final;
         }
 
         public static byte[] stringToBytes(byte[] existing, string str) {
@@ -46,6 +57,16 @@ namespace FlooLink
         public static byte[] stringEnumerableToBytes(IEnumerable<string> data) {
             var joined = String.Join(LIST_SEP_CHAR, data);
             return stringToBytes(joined);
+        }
+
+        public static byte[] createPlayerToNameBytes(IEnumerable<string> usernames, Map<byte, string> map) {
+            List<byte> final = new List<byte>();
+            foreach(string user in usernames) {
+                final.AddRange(stringToBytes(map.Reverse[user], user));
+                final.Add(LIST_SEP_BYTE);
+            }
+            final.RemoveAt(final.Count - 1);
+            return final.ToArray();
         }
     }
 

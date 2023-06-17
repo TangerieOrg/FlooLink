@@ -22,10 +22,13 @@ namespace FlooLink
         // Players in-game but not yet in voice (and requested to join)
         public HashSet<string> playersRequestedJoin = new HashSet<string>();
 
+        
+
         public Manager(Server _server) {
             instance = this;
             server = _server;
 
+            // Add wss
             ws = new WebSocketServer(8081);
             ws.AddWebSocketService<SignalServer>("/");
             wsHost = ws!.WebSocketServices["/"];
@@ -45,6 +48,8 @@ namespace FlooLink
             server.Information($"FlooLink Started on {ws.Port}");
             #if DEBUG
             playersInVoice.Add("testPlayer");
+            SignalServer.ShortIDtoUsername.Add(0, "testPlayer");
+            SignalServer.freeIds.Remove(0);
             #endif
         }
 
@@ -57,8 +62,8 @@ namespace FlooLink
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % 30 == 0) {
-                // Once per second on default tickrate
+            if(ticks % (30 * 5) == 0) {
+
             }
             ticks++;
         }
