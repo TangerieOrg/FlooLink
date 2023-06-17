@@ -10,6 +10,7 @@
 		<BaseOutputPath>..\bin</BaseOutputPath>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,7 +24,7 @@
 			<IncludeAssets>all</IncludeAssets>
 		</PackageReference>
 		<!-- <PackageReference Include="SocketIOSharp" Version="2.0.3" /> -->
-		<PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+		<!-- <PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" /> -->
 	</ItemGroup>
 
 	<ItemGroup>
@@ -44,6 +45,9 @@
 	  </Reference>
 	  <Reference Include="Serilog.Sinks.File">
 	    <HintPath>..\dlls\Serilog.Sinks.File.dll</HintPath>
+	  </Reference>
+	  <Reference Include="WebSocketSharp">
+	    <HintPath>..\dlls\websocket-sharp.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 

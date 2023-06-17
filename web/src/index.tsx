@@ -6,6 +6,11 @@ if (process.env.NODE_ENV === 'development') {
     import("./modules/PWA").then(m => m.LoadPWA());
 }
 
+import {enableMapSet} from "immer"
+// Must be called before other imports
+enableMapSet();
+
+
 import { BrowserRouter } from "react-router-dom";
 import { render } from "preact";
 import App from "./App";

@@ -1,1 +1,1 @@
-export const isDebugMode = process.env.NODE_ENV === "development" || window.localStorage.getItem("debug") === "true";
+export const isDebugMode = !(window.localStorage.getItem("debug") === "false") && (process.env.NODE_ENV === "development" || window.localStorage.getItem("debug") === "true");

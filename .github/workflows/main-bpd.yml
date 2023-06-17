@@ -6,15 +6,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-server:
-    uses: TangerieOrg/Workflows/.github/workflows/docker-build-push.yml@main
-    with:
-      image_name: floo-link/server
-      registry_name: docker.tangerie.xyz
-      ref: main
-      path: server
-    secrets: inherit
-
   build-web:
     uses: TangerieOrg/Workflows/.github/workflows/docker-build-push.yml@main
     with:
@@ -29,7 +20,6 @@ jobs:
     uses: TangerieOrg/Workflows/.github/workflows/docker-deploy.yml@main
     needs: 
       - build-web
-      - build-server
     with:
       image_name: floo-link
       registry_name: docker.tangerie.xyz
