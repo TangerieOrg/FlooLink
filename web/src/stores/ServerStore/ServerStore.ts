@@ -4,9 +4,14 @@ import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
 import SimplePeer from "simple-peer";
 
+interface UserData {
+    username : string;
+    position: Float32Array;
+}
+
 interface State {
     status: ConnectionStatus;
-    users: Map<number, string>;
+    users: Map<number, UserData>;
     opts: ServerInitOptions;
     peers: Map<string, SimplePeer.SimplePeer>;
 }
@@ -114,7 +119,10 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
         set(state => {
             state.users.clear();
             for(const p of players) {
-                state.users.set(p.charCodeAt(0), p.slice(1));
+                state.users.set(p.charCodeAt(0), {
+                    username: p.slice(1),
+                    position: new Float32Array([0, 0, 0])
+                });
             }
             // state.users = players;
             // state.users = new Set(players.map(x => x.slice(1)));
@@ -127,7 +135,10 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
         // if(username == get().opts.playerId) return;
         set(state => {
             // state.users.delete(data[0])
-            state.users.set(data[0], decoder.decode(data.slice(1)))
+            state.users.set(data[0], {
+                username: decoder.decode(data.slice(1)),
+                position: new Float32Array([0, 0, 0])
+            })
         })
     },
     [ServerMessageType.PlayerLeave]: data => {
@@ -146,7 +157,10 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
         for(let i = 0; i < numPlayers; i++) {
             const id = data[i * 13];
             const pos = new Float32Array(data.buffer.slice(i * 13 + 1), 0, 3);
-            console.log(id, pos);
+            // console.log(id, pos);
+            set(state => {
+                state.users.get(id)!.position = pos;
+            })
         }
     },
     // Handle receiving returned

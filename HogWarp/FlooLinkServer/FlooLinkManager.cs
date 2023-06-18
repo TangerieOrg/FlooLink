@@ -61,7 +61,7 @@ namespace FlooLink
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % (30) == 0) {
+            if(ticks % (10) == 0) {
                 int length = playersInVoice.Count * 13 + 1;
                 byte[] msg = new byte[length]; // 1 + 1 + 3*4
                 msg[0] = (byte)SendMessageType.Position;

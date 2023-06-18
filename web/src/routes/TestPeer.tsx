@@ -53,7 +53,7 @@ export default function TestPeerRoute() {
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Peer Test: {status}</h1>
         {
-            Array.from(users.values()).map(username => <span class="text-xl text-center">{username}</span>)
+            Array.from(users.values()).map(({username, position}) => <span class="text-xl text-center">{username} {position.toString()}</span>)
         }
         {
             status === ConnectionStatus.Failed && <div class="text-center">
