@@ -15,14 +15,13 @@ namespace FlooLink
         public WebSocketServer ws;
         public WebSocketServiceHost wsHost;
 
-        public static Manager? instance;
+        public static Manager instance;
 
         // Players in-game and in voice
         public HashSet<string> playersInVoice = new HashSet<string>();
         // Players in-game but not yet in voice (and requested to join)
         public HashSet<string> playersRequestedJoin = new HashSet<string>();
-
-        
+        public Dictionary<string, Player> playerMap = new Dictionary<string, Player>();
 
         public Manager(Server _server) {
             instance = this;
@@ -62,8 +61,31 @@ namespace FlooLink
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % (30 * 5) == 0) {
-
+            if(ticks % (30) == 0) {
+                int length = playersInVoice.Count * 13 + 1;
+                byte[] msg = new byte[length]; // 1 + 1 + 3*4
+                msg[0] = (byte)SendMessageType.Position;
+                int i = 0;
+                #if DEBUG
+                if(!playerMap.ContainsKey("tangerie")) {
+                    return;
+                }
+                #endif
+                foreach(var username in playersInVoice) {
+                    msg[1 + i * 13] = SignalServer.ShortIDtoUsername.Reverse[username];
+                    #if DEBUG
+                    var pos = playerMap["tangerie"].Address->LastMovement.Move.Position;
+                    #else
+                    var pos = playerMap[username].Address->LastMovement.Move.Position;
+                    #endif
+                    
+                    BitConverter.GetBytes(pos.X).CopyTo(msg, 1 + i * 13 + 1);
+                    BitConverter.GetBytes(pos.Y).CopyTo(msg, 1 + i * 13 + 1 + 4);
+                    BitConverter.GetBytes(pos.Z).CopyTo(msg, 1 + i * 13 + 1 + 4 * 2);
+                    i++;
+                }
+                
+                wsHost.Sessions.Broadcast(msg);
             }
             ticks++;
         }
@@ -112,10 +134,12 @@ namespace FlooLink
         public unsafe void PlayerJoin(Player player)
         {
             Logger.Debug("Player joined", player.Name);
+            playerMap.Add(player.Name, player);
         }
 
         public unsafe void PlayerLeave(Player player) {
             Logger.Debug("Player left", player.Name);
+            playerMap.Remove(player.Name);
             
             if(playersInVoice.Remove(player.Name)) {
                 // Disconnect websocket for player

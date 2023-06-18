@@ -137,7 +137,17 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
         })
     },
     [ServerMessageType.Position]: data => {
-        console.log(data);
+        // 357728 -448836 -82809
+        // new Float32Array(data.slice(1).buffer)
+        // Per player = 13 bytes
+        // data[0] = ID
+        // data[1:12] = X, Y, Z (3 Float32s)
+        const numPlayers = data.length / 13;
+        for(let i = 0; i < numPlayers; i++) {
+            const id = data[i * 13];
+            const pos = new Float32Array(data.buffer.slice(i * 13 + 1), 0, 3);
+            console.log(id, pos);
+        }
     },
     // Handle receiving returned
     [ServerMessageType.ReturnSignal]: data => {
