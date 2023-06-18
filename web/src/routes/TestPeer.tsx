@@ -23,7 +23,7 @@ export default function TestPeerRoute() {
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Peer Test: {status}</h1>
         {
-            Array.from(users.values()).filter(u => u.username !== me.username).map(({username, position}) => <span class="text-xl text-center">{username} [{position.map(x => Math.round(x/900)).toString()}] Volume = {calcVolumeMult(new Float32Array([357904,-448904,-82809]), position)}</span>)
+            Array.from(users.values()).filter(u => u.username !== me.username).map(({username, position}) => <span class="text-xl text-center">{username} [{position.map(x => Math.round(x/900)).toString()}] Volume = {Math.round(calcVolumeMult(new Float32Array([357904,-448904,-82809]), position) * 100)}%</span>)
         }
         {
             status === ConnectionStatus.Failed && <div class="text-center">
