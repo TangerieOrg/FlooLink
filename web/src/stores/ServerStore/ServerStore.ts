@@ -1,4 +1,4 @@
-import { ConnectionStatus, ServerInitOptions, ServerMessageType } from "./types";
+import { ClientMessageType, ConnectionStatus, ServerInitOptions, ServerMessageType } from "./types";
 import { createStore, createUseStore } from "@tangerie/better-global-store";
 import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
@@ -126,7 +126,8 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
             }
             // state.users = players;
             // state.users = new Set(players.map(x => x.slice(1)));
-        })
+        });
+        ws!.send(decoder.decode(new Uint8Array([ClientMessageType.SendSignal, 0])) + JSON.stringify({key: "value"}))
     },
     [ServerMessageType.PlayerJoin]: data => {
         // createRecieverPeer for new peer

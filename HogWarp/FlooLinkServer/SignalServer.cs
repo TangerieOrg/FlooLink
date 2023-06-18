@@ -97,10 +97,17 @@ namespace FlooLink
 
         protected override void OnMessage (MessageEventArgs e)
         {
+            RecieveMessageType cmd = (RecieveMessageType)e.RawData[0];
             #if DEBUG
-            server.Information($"[MSG - {shortId} {username}] {e.Data}");
+            server.Information($"[MSG - {shortId} {username}] {cmd.ToString()} {e.Data}");
+            server.Information($"{e.RawData[1].ToString()}");
             #endif
+            
             // Handle signalling
+        }
+
+        public WebSocket GetSocketByShortID(byte id) {
+            return Sessions[UsernameToID.Forward[ShortIDtoUsername.Forward[0]]].WebSocket;
         }
 
         private void SendCommand(SendMessageType cmd, byte[] data) {
