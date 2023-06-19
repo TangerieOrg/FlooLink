@@ -4,8 +4,8 @@ namespace FlooLink
         where T1 : notnull 
         where T2 : notnull
     {
-        private Dictionary<T1, T2> _forward = new Dictionary<T1, T2>();
-        private Dictionary<T2, T1> _reverse = new Dictionary<T2, T1>();
+        public Dictionary<T1, T2> _forward = new Dictionary<T1, T2>();
+        public Dictionary<T2, T1> _reverse = new Dictionary<T2, T1>();
 
         public Map()
         {
@@ -48,6 +48,18 @@ namespace FlooLink
         public bool Remove(T1 t1, T2 t2) {
             _forward.Remove(t1);
             return _reverse.Remove(t2);
+        }
+
+        public bool ContainsForward(T1 t1) {
+            return _forward.ContainsKey(t1);
+        }
+
+        public bool ContainsReverse(T2 t2) {
+            return _reverse.ContainsKey(t2);
+        }
+
+        public int Count() {
+            return _forward.Count();
         }
 
         public Indexer<T1, T2> Forward { get; private set; }

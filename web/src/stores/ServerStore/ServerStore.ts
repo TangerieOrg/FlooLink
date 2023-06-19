@@ -1,8 +1,9 @@
-import { ClientMessageType, ConnectionStatus, ServerInitOptions, ServerMessageType } from "./types";
+import { ServerInitOptions } from "./types";
 import { createStore, createUseStore } from "@tangerie/better-global-store";
 import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
 import SimplePeer from "simple-peer";
+import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
 
 interface UserData {
     username : string;
@@ -38,7 +39,7 @@ export const ServerStore = createStore({
             }
             state.opts = opts;
             state.status = ConnectionStatus.Connecting;
-            ws = new WebSocket(`${opts.url}?playerId=${opts.playerId}`);
+            ws = new WebSocket(`${opts.url}/vc?playerId=${opts.playerId}`);
 
             setupSocket();
         },
@@ -49,7 +50,7 @@ export const ServerStore = createStore({
             }
 
             state.status = ConnectionStatus.Connecting;
-            ws = new WebSocket(`${state.opts.url}?playerId=${state.opts.playerId}`);
+            ws = new WebSocket(`${state.opts.url}/vc?playerId=${state.opts.playerId}`);
 
             setupSocket();
         },
@@ -179,3 +180,5 @@ const handleMessage = (data : Uint8Array) => {
 }
 
 export const useServerStore = createUseStore(ServerStore);
+export const selectByUsername = (username : string) => (state : State) => [...state.users.values()].find(x => x.username === username)!
+export const selectMe = (state : State) => [...state.users.values()].find(x => x.username === state.opts.playerId)!

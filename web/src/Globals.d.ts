@@ -1,4 +1,6 @@
 declare module "*.css";
+declare module "*.png";
+declare module "*.jpg";
 
 declare type ClassConstructor<T, TArgs extends unknown[] = []> = new(...args : TArgs) => T;
 

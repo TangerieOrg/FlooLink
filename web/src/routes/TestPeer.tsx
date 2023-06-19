@@ -1,5 +1,6 @@
+import { ConnectionStatus } from "@MyTypes/SocketTypes";
 import { calcVolumeMult } from "@modules/Sound";
-import { ConnectionStatus, ServerInitOptions, ServerStore, useServerStore } from "@stores/ServerStore";
+import { ServerInitOptions, ServerStore, selectMe, useServerStore } from "@stores/ServerStore";
 import { URLStore, useURLStore } from "@stores/URLStore";
 import { useEffect, useMemo } from "preact/hooks"
 
@@ -11,7 +12,7 @@ const selectConnectionOptions = (state : ReturnType<typeof URLStore["get"]>) : S
 export default function TestPeerRoute() {
     const { status, users } = useServerStore();
     const options = useURLStore(selectConnectionOptions);
-    const me = useServerStore(state => [...state.users.values()].find(x => x.username === options.playerId)!);
+    const me = useServerStore(selectMe);
 
     useEffect(() => {
         ServerStore.actions.connect(options);

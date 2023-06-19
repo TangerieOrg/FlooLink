@@ -13,7 +13,8 @@ namespace FlooLink
         public Server server;
 
         public WebSocketServer ws;
-        public WebSocketServiceHost wsHost;
+        public WebSocketServiceHost vcServer;
+        public WebSocketServiceHost mapServer;
 
         public static Manager instance;
 
@@ -29,8 +30,11 @@ namespace FlooLink
 
             // Add wss
             ws = new WebSocketServer(8081);
-            ws.AddWebSocketService<SignalServer>("/");
-            wsHost = ws!.WebSocketServices["/"];
+            ws.AddWebSocketService<VoiceChatServer>("/vc");
+            ws.AddWebSocketService<MapServer>("/map");
+            vcServer = ws!.WebSocketServices["/vc"];
+            mapServer = ws!.WebSocketServices["/map"];
+            MapServer.Self = mapServer;
             RegisterHWEvents();
         }
 
@@ -46,9 +50,8 @@ namespace FlooLink
             ws.Start();
             server.Information($"FlooLink Started on {ws.Port}");
             #if DEBUG
-            playersInVoice.Add("testPlayer");
-            SignalServer.ShortIDtoUsername.Add(0, "testPlayer");
-            SignalServer.freeIds.Remove(0);
+            // playersInVoice.Add("testPlayer");
+            // PlayerIDManager.RegisterPlayer("testPlayer");
             #endif
         }
 
@@ -61,31 +64,8 @@ namespace FlooLink
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % (10) == 0) {
-                int length = playersInVoice.Count * 13 + 1;
-                byte[] msg = new byte[length]; // 1 + 1 + 3*4
-                msg[0] = (byte)SendMessageType.Position;
-                int i = 0;
-                #if DEBUG
-                if(!playerMap.ContainsKey("tangerie")) {
-                    return;
-                }
-                #endif
-                foreach(var username in playersInVoice) {
-                    msg[1 + i * 13] = SignalServer.ShortIDtoUsername.Reverse[username];
-                    #if DEBUG
-                    var pos = playerMap["tangerie"].Address->LastMovement.Move.Position;
-                    #else
-                    var pos = playerMap[username].Address->LastMovement.Move.Position;
-                    #endif
-                    
-                    BitConverter.GetBytes(pos.X).CopyTo(msg, 1 + i * 13 + 1);
-                    BitConverter.GetBytes(pos.Y).CopyTo(msg, 1 + i * 13 + 1 + 4);
-                    BitConverter.GetBytes(pos.Z).CopyTo(msg, 1 + i * 13 + 1 + 4 * 2);
-                    i++;
-                }
-                
-                wsHost.Sessions.Broadcast(msg);
+            if(ticks % 10 == 0) {
+                MapServer.BroadcastPlayerPositions();
             }
             ticks++;
         }
@@ -101,9 +81,11 @@ namespace FlooLink
             if(!message.StartsWith("/")) return;
             List<string> args = message.Split(new char[] {' ','\t'}, StringSplitOptions.RemoveEmptyEntries).ToList();
             if(!(args[0] == "/fl" || args[0] == "/floolink")) return;
+            cancel = true;
+            if(args.Count == 1) return;
             string command = args[1];
             args.RemoveRange(0, 2);
-            cancel = true;
+            
             // From here all messages are "/fl <command> ...<args>" (or "/floolink ...")
 
             #if DEBUG
@@ -122,6 +104,10 @@ namespace FlooLink
                 foreach(var username in playersInVoice) {
                     MessageServerPlayer(player, "    " + username);
                 }
+                MessageServerPlayer(player, "In Game:");
+                foreach(var pair in PlayerIDManager.GetEnumerator()) {
+                    MessageServerPlayer(player, $"   [{pair.Item1}] {pair.Item2}");
+                }
             }
             #endif
             if(command == "join") {
@@ -133,12 +119,15 @@ namespace FlooLink
 
         public unsafe void PlayerJoin(Player player)
         {
-            Logger.Debug("Player joined", player.Name);
+            var id = PlayerIDManager.RegisterPlayer(player);
+            Logger.Debug("Player joined", player.Name, id.ToString());
             playerMap.Add(player.Name, player);
+            MapServer.BroadcastPlayerJoin(player);
         }
 
         public unsafe void PlayerLeave(Player player) {
             Logger.Debug("Player left", player.Name);
+            MapServer.BroadcastPlayerLeave(player);
             playerMap.Remove(player.Name);
             
             if(playersInVoice.Remove(player.Name)) {
@@ -147,11 +136,12 @@ namespace FlooLink
             }
 
             playersRequestedJoin.Remove(player.Name);
+            PlayerIDManager.UnregisterPlayer(player);
         }
 
         public void DisconnectByUsername(string username) {
-            string ID = SignalServer.UsernameToID.Forward[username];
-            wsHost.Sessions.CloseSession(ID);
+            string ID = VoiceChatServer.UsernameToSessionID.Forward[username];
+            vcServer.Sessions.CloseSession(ID);
         }
     }
 }

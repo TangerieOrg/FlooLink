@@ -26,29 +26,5 @@ namespace FlooLink
 
             manager.Start();
         }
-
-        
-        // public void HandleMessage(Player player, ushort opcode, Buffer buffer)
-        // {
-        //     var reader = new BufferReader(buffer);
-
-        //     if(opcode == 43)
-        //     {
-        //         reader.ReadBits(out var ping, 64);
-
-        //         _server!.Information($"Ping: {ping}");
-
-        //         SendPing(player, ping);
-        //     }
-        // }
-
-        // private void SendPing(Player player, ulong id)
-        // {
-        //     var buffer = new Buffer(1000);
-        //     var writer = new BufferWriter(buffer);
-        //     writer.Write(id);
-
-        //     _server!.PlayerManager.SendTo(player, Name, 43, writer);
-        // }
     }
 }
