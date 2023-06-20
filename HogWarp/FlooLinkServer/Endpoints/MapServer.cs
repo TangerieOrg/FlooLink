@@ -126,10 +126,8 @@ namespace FlooLink
                 BitConverter.GetBytes(id).CopyTo(msg, offset);
                 var pos = PlayerIDManager.GetPosition(id);
                 BitConverter.GetBytes(pos.X).CopyTo(msg, offset + 2);
-                // Swap Z & Y, Z = Height
-                // Send client swapped so Y = Height
-                BitConverter.GetBytes(pos.Z).CopyTo(msg, offset + 6);
-                BitConverter.GetBytes(pos.Y).CopyTo(msg, offset + 10);
+                BitConverter.GetBytes(pos.Y).CopyTo(msg, offset + 6);
+                BitConverter.GetBytes(pos.Z).CopyTo(msg, offset + 10);
                 offset += 14;
             }
             Self.Sessions.Broadcast(msg);
