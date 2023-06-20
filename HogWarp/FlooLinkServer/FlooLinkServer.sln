@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33706.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlooLinkServer", "FlooLinkServer.csproj", "{5027ABD7-7413-4D4A-AED5-38D3E9C2FB8A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5027ABD7-7413-4D4A-AED5-38D3E9C2FB8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5027ABD7-7413-4D4A-AED5-38D3E9C2FB8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5027ABD7-7413-4D4A-AED5-38D3E9C2FB8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5027ABD7-7413-4D4A-AED5-38D3E9C2FB8A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF75780C-700B-40D9-B9B6-90A3415B18B7}
+	EndGlobalSection
+EndGlobal
