@@ -13,8 +13,6 @@ export type MouseButton = typeof MouseButton[keyof typeof MouseButton];
 export interface PanZoomConfig {
     initialScale: number;
     initialTranslation: Vec2;
-    maxTranslate: Vec2;
-    minTranslate: Vec2;
     maxScale : number;
     minScale : number;
 }
@@ -46,7 +44,7 @@ const getTranslateScaleToCursor = (newScale : number, x : number, y : number, tr
 
 
 
-export default function SVGPanZoom({children, width, height, config: {initialScale, initialTranslation, maxScale, minScale, maxTranslate, minTranslate}, ...props} : Props & Omit<JSX.SVGAttributes<SVGSVGElement>, keyof Props>) {
+export default function SVGPanZoom({children, width, height, config: {initialScale, initialTranslation, maxScale, minScale}, ...props} : Props & Omit<JSX.SVGAttributes<SVGSVGElement>, keyof Props>) {
     const [scale, setScale] = useState(initialScale ?? 1);
     const [translate, setTranslate] = useState<Vec2>(initialTranslation ? initialTranslation.map(v => v*scale) as Vec2 : [0, 0]);
     const [screenMouseStart, setScreenMouseStart] = useState<Vec2>([0, 0]);
@@ -59,7 +57,7 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
         setIsDragging(true);
         setTranslateStart([translate[0], translate[1]]);
         setScreenMouseStart([ev.clientX, ev.clientY]);
-    }, [scale, translate]);
+    }, [translate]);
 
     const onMouseUp = useCallback<MouseEventHandler>(ev => {
         if(ev.button !== MouseButton.Left) return;
@@ -79,7 +77,7 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
                 ev.clientY + translateStart[1] - screenMouseStart[1]
             ]);
         }, 1 / 60);
-    }, [isDragging, translate, scale, translateStart, screenMouseStart]);
+    }, [isDragging, translateStart, screenMouseStart]);
 
     const onWheel = throttle<ScrollEventHandler>(ev => {
         ev.preventDefault();
@@ -104,6 +102,7 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseLeave}
         onMouseMove={onMouseMove}
+        class={`${props.class} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
     > 
         {children}
     </svg>

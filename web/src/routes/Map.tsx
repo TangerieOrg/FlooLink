@@ -21,16 +21,7 @@ export default function MapRoute() {
     }, []);
 
     
-    return <div class="h-screen w-screen">
-        {/* <h1 class="text-2xl mb-8">{status}</h1>
-        {
-            players.map(player => <div class="flex flex-col">
-                <h2 class="text-xl">{player.username} ({player.id})</h2>
-                <span>{player.position.join(", ")}</span>
-                <span>{valueToKey(player.info.Gender, Unreal.EGender)}</span>
-                <span>{valueToKey(player.info.House, Unreal.EHouse)}</span>
-            </div>)
-        } */}
+    return <div class="h-screen w-screen bg-[#313133]">
         <SVGPlayerMap class="w-screen h-screen"/>
     </div>
 }

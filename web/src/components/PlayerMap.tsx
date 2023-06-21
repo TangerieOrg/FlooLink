@@ -12,6 +12,7 @@ function PlayerMap() {
     const mapRef = useRef<L.Map>();
     const [v, setV] = useState(0);
 
+
     useEffect(() => {
         const map = L.map("map", {
             crs: L.CRS.Simple,
