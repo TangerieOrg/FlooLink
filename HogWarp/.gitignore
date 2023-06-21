@@ -1,4 +1,4 @@
-dlls/HogWarp*.dll
+# dlls/HogWarp*.dll
 # TeamCity is a build add-in
 _TeamCity*
 
