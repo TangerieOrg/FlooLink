@@ -8,12 +8,14 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, media]
+    env:
+      DOTNET_INSTALL_DIR: ../dotnet
     steps:
       - uses: actions/checkout@v3
-      # - name: Setup dotnet ${{ matrix.dotnet-version }}
-      #   uses: actions/setup-dotnet@v3
-      #   with:
-      #     dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
       # # You can test your matrix by printing the current dotnet version
       - name: Display dotnet version
         run: dotnet --version
