@@ -1,0 +1,32 @@
+name: Docker Build, Push & Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, media]
+    strategy:
+      matrix:
+        dotnet-version: [ '7.0.x' ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      # You can test your matrix by printing the current dotnet version
+      - name: Display dotnet version
+        run: dotnet --version
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: ./HogWarp/FlooLinkServer
+      - name: Build
+        run: dotnet publish -c Debug
+        working-directory: ./HogWarp/FlooLinkServer
+      - uses: actions/upload-artifact@v2
+        with:
+          name: FlooLinkPlugin
+          path: HogWarp/bin/Debug/net7.0/publish/
