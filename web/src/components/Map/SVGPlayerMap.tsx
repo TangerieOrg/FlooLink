@@ -6,6 +6,7 @@ import { throttle } from "lodash";
 import { usePlayerStore } from "@stores/PlayerStore";
 import { MediumTiles as TileSet } from "@assets/tiles";
 import PlayerMarker from "./PlayerMarker";
+import { isDebugMode } from "../../Config";
 
 export default function SVGPlayerMap(props : JSX.SVGAttributes<SVGSVGElement>) {
     const [tiles, setTiles] = useState(TileSet);
@@ -17,12 +18,21 @@ export default function SVGPlayerMap(props : JSX.SVGAttributes<SVGSVGElement>) {
     const initialWidth = window.innerWidth;
     const initialHeight = window.innerHeight;
 
-    const config : PanZoomConfig = useMemo(() => ({
-        initialScale: 1,
-        initialTranslation: [(initialWidth - MAP_SIZE) / 2, (initialHeight - MAP_SIZE) / 2],
-        maxScale: 25,
-        minScale: 1
-    }), []);
+    const config : PanZoomConfig = useMemo(() => {
+        // Just zooming on my character for the time being
+        if(isDebugMode) return {
+            initialScale: 10,
+            initialTranslation: [-450, -310],
+            maxScale: 25,
+            minScale: 1
+        }
+        return {
+            initialScale: 1,
+            initialTranslation: [(initialWidth - MAP_SIZE) / 2, (initialHeight - MAP_SIZE) / 2],
+            maxScale: 25,
+            minScale: 1
+        }
+    }, []);
 
     const [width, setWidth] = useState(initialWidth);
     const [height, setHeight] = useState(initialHeight);

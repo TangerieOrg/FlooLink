@@ -6,10 +6,13 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using WebSocketSharp.Net;
 
+
 namespace FlooLink
 {
 
     public class Manager {
+        public const double UpdatesPerSecond = 10;
+        private const int tickMod = (int)(30 / UpdatesPerSecond);
         public Server server;
 
         public WebSocketServer ws;
@@ -49,10 +52,6 @@ namespace FlooLink
         public void Start() {
             ws.Start();
             server.Information($"FlooLink Started on {ws.Port}");
-            #if DEBUG
-            // playersInVoice.Add("testPlayer");
-            // PlayerIDManager.RegisterPlayer("testPlayer");
-            #endif
         }
 
         public void Shutdown() {
@@ -60,14 +59,14 @@ namespace FlooLink
             server.Information("FlooLink Stopped");
         }
 
-        private int ticks = 0;
+        public static int Ticks = 0;
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % 10 == 0) {
+            if(Ticks % tickMod == 0) {
                 MapServer.BroadcastPlayerPositions();
             }
-            ticks++;
+            Ticks++;
         }
 
         private void MessageServerPlayer(Player player, params string[] msgs) {

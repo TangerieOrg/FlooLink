@@ -1,6 +1,14 @@
 export namespace Unreal {
     export type Vector3 = [X: number, Y: number, Z: number];
 
+    export type Vector2 = [X : number, Y : number];
+
+    export interface Move {
+        position : Vector3;
+        // -180 => 180?
+        direction : number;
+    }
+
     export const EGender = {
         Male: 0,
         Female: 1,

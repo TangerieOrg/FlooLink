@@ -8,7 +8,8 @@ import { valueToKey } from "./Util";
 export interface PlayerState {
     username: string;
     id: number;
-    position: Unreal.Vector3;
+    move: Unreal.Move;
+    // position: Unreal.Vector3;
     info: Unreal.CharacterInfo;
 }
 
@@ -103,7 +104,6 @@ TOTAL = 3 + NameLen
 */
 const parsePlayerInfo = (remainingData : ArrayBuffer, offset : number) : [char: Unreal.CharacterInfo, username: string, offset: number] => {
     const [Gender, House, nameLen] = new Uint8Array(remainingData, offset, 3) as any as [Unreal.EGender, Unreal.EHouse, number];
-    console.log(Gender, House, nameLen);
     const name = bufToString(remainingData, offset + 3, nameLen);
 
     return [{ Gender, House }, name, offset + 3 + nameLen]
@@ -140,7 +140,10 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                 state.players.set(id, {
                     id,
                     username,
-                    position: [0, 0, 0],
+                    move: {
+                        direction: 0,
+                        position: [0, 0, 0]
+                    },
                     info
                 })
             }
@@ -153,13 +156,15 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
     */
     [ServerMessageType.PlayerJoin]: data => {
         const id = new Uint16Array(data, 0, 1)[0];
-        console.log(id, new Uint8Array(data), data.byteLength);
         const [info, username] = parsePlayerInfo(data, 2);
         set(state => {
             state.players.set(id, {
                 id,
                 username,
-                position: [0, 0, 0],
+                move: {
+                    direction: 0,
+                    position: [0, 0, 0]
+                },
                 info
             })
         });
@@ -175,22 +180,26 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
         })
     },
     [ServerMessageType.Position]: data => {
+        const MOVE_ELS = 4;
+        const DATA_SIZE_BYTES = MOVE_ELS*4 + 2;
         /*
         Better for JS to keep ids first then positions
         MSG STRUCTURE = <PlayerIds (Uint16) = 2*COUNT> <PlayerPositions (Float32) = 12*COUNT>
-        LENGTH = 14 * COUNT
-        COUNT = Length / 14
+        LENGTH = DATA_SIZE_BYTES * COUNT
+        COUNT = Length / DATA_SIZE_BYTES
         */
-        const count = data.byteLength / 14;
+        const count = data.byteLength / DATA_SIZE_BYTES;
+        // const count = data.byteLength / 18;
         const ids = new Uint16Array(data, 0, count);
         // id = 2 bytes
         const positions = new Float32Array(data.slice(count * 2));
         set(state => {
             for(let i = 0; i < count; i++) {
                 const p = state.players.get(ids[i])!;
-                p.position[0] = positions[i*3];
-                p.position[1] = positions[i*3 + 1];
-                p.position[2] = positions[i*3 + 2];
+                p.move.position[0] = positions[i*MOVE_ELS];
+                p.move.position[1] = positions[i*MOVE_ELS + 1];
+                p.move.position[2] = positions[i*MOVE_ELS + 2];
+                p.move.direction = positions[i*MOVE_ELS + 3];
             }
         })
     }
