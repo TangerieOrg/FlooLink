@@ -3,7 +3,7 @@ import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
 import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
 import { Unreal } from "@MyTypes/Unreal";
-import { valueToKey } from "./Util";
+import { PlayerInitOptions, valueToKey } from "./Util";
 import SimplePeer = require("simple-peer");
 
 interface PlayerState {
@@ -16,6 +16,7 @@ interface PlayerState {
 
 interface State {
     status: ConnectionStatus;
+    opts: PlayerInitOptions;
     players: Map<number, PlayerState>;
 }
 
@@ -23,6 +24,10 @@ let ws: WebSocket | undefined = undefined;
 
 const initial = (): State => ({
     status: ConnectionStatus.Ready,
+    opts: {
+        playerId: "",
+        url: ""
+    },
     players: new Map()
 })
 
@@ -38,6 +43,16 @@ export const PlayerStore = createStore({
             ws = new WebSocket(`${url}/map`);
             ws.binaryType = "arraybuffer";
 
+            setupSocket();
+        },
+        connectVC(state, opts: PlayerInitOptions) {
+            if(state.status === "Connected" || state.status === "Connecting") {
+                console.error("Socket already connecting");
+                return;
+            }
+            state.opts = opts;
+            state.status = ConnectionStatus.Connecting;
+            ws = new WebSocket(`${opts.url}/vc?playerId=${opts.playerId}`);
             setupSocket();
         },
         disconnect(state) {

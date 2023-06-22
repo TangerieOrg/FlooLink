@@ -30,7 +30,11 @@ namespace FlooLink
         protected override void OnOpen () {
             base.OnOpen();
             username = QueryString["playerId"];
-            if(username == null) {
+
+            server.Information($"[VoiceChatServer] Open to user : {username}");
+
+
+            if (username == null) {
                 Sessions.CloseSession(ID, CloseStatusCode.Normal, "No username provided");
                 return;
             }
@@ -44,6 +48,7 @@ namespace FlooLink
                 Sessions.CloseSession(ID, CloseStatusCode.Normal, "User not in game");
                 return;
             }
+
             shortId = PlayerIDManager.IDToUsername.Reverse[username];
             
 

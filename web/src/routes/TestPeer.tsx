@@ -2,10 +2,11 @@ import { ConnectionStatus } from "@MyTypes/SocketTypes";
 import { calcVolumeMult } from "@modules/Sound";
 import { ServerInitOptions, ServerStore, selectMe, useServerStore } from "@stores/ServerStore";
 import { URLStore, useURLStore } from "@stores/URLStore";
+import { map } from "lodash";
 import { useEffect, useMemo } from "preact/hooks"
 
 const selectConnectionOptions = (state : ReturnType<typeof URLStore["get"]>) : ServerInitOptions => ({
-    playerId: state.query["playerId"] ?? "tangerie",
+    playerId: state.query["playerId"] ?? "vonbismarck",
     url: state.query["url"] ?? "ws://localhost:8081"
 })
 
@@ -19,7 +20,15 @@ export default function TestPeerRoute() {
         return () => ServerStore.actions.disconnect();
     }, []);
 
-
+    useEffect(() => {
+        console.log(status);
+        if(status === 'Connected')
+        {
+            Array.from(users.values()).map(({username, position}) => {
+                console.log(username)
+            })
+        }
+    }, [status,users])
 
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Peer Test: {status}</h1>
