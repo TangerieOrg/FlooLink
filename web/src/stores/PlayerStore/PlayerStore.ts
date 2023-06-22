@@ -4,12 +4,14 @@ import { DebugLog } from "@modules/Debug";
 import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
 import { Unreal } from "@MyTypes/Unreal";
 import { valueToKey } from "./Util";
+import SimplePeer = require("simple-peer");
 
 interface PlayerState {
     username: string;
     id: number;
     position: Unreal.Vector3;
     info: Unreal.CharacterInfo;
+    peer: SimplePeer.Instance;
 }
 
 interface State {
@@ -140,7 +142,8 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                     id,
                     username,
                     position: [0, 0, 0],
-                    info
+                    info,
+                    peer: new SimplePeer({ initiator: true })
                 })
             }
         })
@@ -158,7 +161,8 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                 id,
                 username,
                 position: [0, 0, 0],
-                info
+                info,
+                peer: new SimplePeer({ initiator: true })
             })
         });
     },
