@@ -1,10 +1,8 @@
-import { Unreal } from "@MyTypes/Unreal";
 import { PlayerStore, usePlayerStore } from "@stores/PlayerStore"
-import { valueToKey } from "@stores/PlayerStore/Util";
 import { URLStore, useURLStore } from "@stores/URLStore";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect } from "preact/hooks";
 
-import SVGPlayerMap from "@components/SVGPlayerMap";
+import SVGPlayerMap from "@components/Map/SVGPlayerMap";
 
 const selectConnectionOptions = (state : ReturnType<typeof URLStore["get"]>) : string => (
     state.query["url"] ?? "ws://localhost:8081"
@@ -21,7 +19,7 @@ export default function MapRoute() {
     }, []);
 
     
-    return <div class="h-screen w-screen bg-[#313133]">
+    return <div class="h-screen w-screen bg-[#323232]">
         <SVGPlayerMap class="w-screen h-screen"/>
     </div>
 }

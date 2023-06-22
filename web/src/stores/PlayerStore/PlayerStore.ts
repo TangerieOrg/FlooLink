@@ -5,7 +5,7 @@ import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes
 import { Unreal } from "@MyTypes/Unreal";
 import { valueToKey } from "./Util";
 
-interface PlayerState {
+export interface PlayerState {
     username: string;
     id: number;
     position: Unreal.Vector3;
@@ -103,6 +103,7 @@ TOTAL = 3 + NameLen
 */
 const parsePlayerInfo = (remainingData : ArrayBuffer, offset : number) : [char: Unreal.CharacterInfo, username: string, offset: number] => {
     const [Gender, House, nameLen] = new Uint8Array(remainingData, offset, 3) as any as [Unreal.EGender, Unreal.EHouse, number];
+    console.log(Gender, House, nameLen);
     const name = bufToString(remainingData, offset + 3, nameLen);
 
     return [{ Gender, House }, name, offset + 3 + nameLen]
@@ -152,7 +153,8 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
     */
     [ServerMessageType.PlayerJoin]: data => {
         const id = new Uint16Array(data, 0, 1)[0];
-        const [info, username] = parsePlayerInfo(data, 1);
+        console.log(id, new Uint8Array(data), data.byteLength);
+        const [info, username] = parsePlayerInfo(data, 2);
         set(state => {
             state.players.set(id, {
                 id,

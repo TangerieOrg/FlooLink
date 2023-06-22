@@ -1,16 +1,11 @@
 import { JSX } from "preact";
-import SVGPanZoom from "./SVGPanZoom";
+import SVGPanZoom from "../SVGPanZoom";
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { PanZoomConfig } from "./SVGPanZoom/SVGPanZoom";
+import { PanZoomConfig } from "../SVGPanZoom/SVGPanZoom";
 import { throttle } from "lodash";
 import { usePlayerStore } from "@stores/PlayerStore";
 import { MediumTiles as TileSet } from "@assets/tiles";
-
-
-
-
-
-
+import PlayerMarker from "./PlayerMarker";
 
 export default function SVGPlayerMap(props : JSX.SVGAttributes<SVGSVGElement>) {
     const [tiles, setTiles] = useState(TileSet);
@@ -51,7 +46,7 @@ export default function SVGPlayerMap(props : JSX.SVGAttributes<SVGSVGElement>) {
             </>)
         }
         {
-            players.map(({ position: [x, y] }) => <circle cx={x / 2000 + 500} cy={y / 2000 + 500} r={10} class="fill-red-500"/>)
+            players.map(player => <PlayerMarker player={player}/>)
         }
     </SVGPanZoom>
 }

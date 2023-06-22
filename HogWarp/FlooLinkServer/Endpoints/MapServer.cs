@@ -92,6 +92,7 @@ namespace FlooLink
         public static void BroadcastPlayerJoin(Player player) {
             List<byte> msg = new List<byte>();
             msg.Add((byte)SendMessageType.PlayerJoin);
+            msg.AddRange(BitConverter.GetBytes(PlayerIDManager.IDToUsername.Reverse[player.Name]));
             addPlayerInfo(player, ref msg);
 
             Self.Sessions.Broadcast(msg.ToArray());
