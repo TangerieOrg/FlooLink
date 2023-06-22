@@ -3,20 +3,17 @@ import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
 import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
 import { Unreal } from "@MyTypes/Unreal";
-import { PlayerInitOptions, valueToKey } from "./Util";
-import SimplePeer = require("simple-peer");
+import { valueToKey } from "./Util";
 
-interface PlayerState {
+export interface PlayerState {
     username: string;
     id: number;
     position: Unreal.Vector3;
     info: Unreal.CharacterInfo;
-    peer: SimplePeer.Instance;
 }
 
 interface State {
     status: ConnectionStatus;
-    opts: PlayerInitOptions;
     players: Map<number, PlayerState>;
 }
 
@@ -24,10 +21,6 @@ let ws: WebSocket | undefined = undefined;
 
 const initial = (): State => ({
     status: ConnectionStatus.Ready,
-    opts: {
-        playerId: "",
-        url: ""
-    },
     players: new Map()
 })
 
@@ -43,16 +36,6 @@ export const PlayerStore = createStore({
             ws = new WebSocket(`${url}/map`);
             ws.binaryType = "arraybuffer";
 
-            setupSocket();
-        },
-        connectVC(state, opts: PlayerInitOptions) {
-            if(state.status === "Connected" || state.status === "Connecting") {
-                console.error("Socket already connecting");
-                return;
-            }
-            state.opts = opts;
-            state.status = ConnectionStatus.Connecting;
-            ws = new WebSocket(`${opts.url}/vc?playerId=${opts.playerId}`);
             setupSocket();
         },
         disconnect(state) {
@@ -120,6 +103,7 @@ TOTAL = 3 + NameLen
 */
 const parsePlayerInfo = (remainingData : ArrayBuffer, offset : number) : [char: Unreal.CharacterInfo, username: string, offset: number] => {
     const [Gender, House, nameLen] = new Uint8Array(remainingData, offset, 3) as any as [Unreal.EGender, Unreal.EHouse, number];
+    console.log(Gender, House, nameLen);
     const name = bufToString(remainingData, offset + 3, nameLen);
 
     return [{ Gender, House }, name, offset + 3 + nameLen]
@@ -157,8 +141,7 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                     id,
                     username,
                     position: [0, 0, 0],
-                    info,
-                    peer: new SimplePeer({ initiator: true })
+                    info
                 })
             }
         })
@@ -170,14 +153,14 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
     */
     [ServerMessageType.PlayerJoin]: data => {
         const id = new Uint16Array(data, 0, 1)[0];
-        const [info, username] = parsePlayerInfo(data, 1);
+        console.log(id, new Uint8Array(data), data.byteLength);
+        const [info, username] = parsePlayerInfo(data, 2);
         set(state => {
             state.players.set(id, {
                 id,
                 username,
                 position: [0, 0, 0],
-                info,
-                peer: new SimplePeer({ initiator: true })
+                info
             })
         });
     },

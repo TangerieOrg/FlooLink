@@ -41,9 +41,6 @@ const getTranslateScaleToCursor = (newScale : number, x : number, y : number, tr
 ])
 
 
-
-
-
 export default function SVGPanZoom({children, width, height, config: {initialScale, initialTranslation, maxScale, minScale}, ...props} : Props & Omit<JSX.SVGAttributes<SVGSVGElement>, keyof Props>) {
     const [scale, setScale] = useState(initialScale ?? 1);
     const [translate, setTranslate] = useState<Vec2>(initialTranslation ? initialTranslation.map(v => v*scale) as Vec2 : [0, 0]);
@@ -51,15 +48,15 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
     const [translateStart, setTranslateStart] = useState<Vec2>(translate);
     const [isDragging, setIsDragging] = useState(false);
 
-    const onMouseDown = useCallback<MouseEventHandler>(ev => {
+    const onMouseDown : MouseEventHandler =ev => {
         if(ev.button !== MouseButton.Left) return;
         ev.preventDefault();
         setIsDragging(true);
         setTranslateStart([translate[0], translate[1]]);
         setScreenMouseStart([ev.clientX, ev.clientY]);
-    }, [translate]);
+    }
 
-    const onMouseUp = useCallback<MouseEventHandler>(ev => {
+    const onMouseUp : MouseEventHandler = useCallback<MouseEventHandler>(ev => {
         if(ev.button !== MouseButton.Left) return;
         ev.preventDefault();
         setIsDragging(false);
@@ -77,9 +74,9 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
                 ev.clientY + translateStart[1] - screenMouseStart[1]
             ]);
         }, 1 / 60);
-    }, [isDragging, translateStart, screenMouseStart]);
+    }, [isDragging]);
 
-    const onWheel = throttle<ScrollEventHandler>(ev => {
+    const onWheel : ScrollEventHandler = throttle<ScrollEventHandler>(ev => {
         ev.preventDefault();
         
         const scroll = ev.deltaY < 0 ? 1 : -1;
@@ -96,13 +93,13 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
         width={width}
         height={height}
         preserveAspectRatio="none"
-        viewBox={`${-translate[0] / scale} ${-translate[1] / scale} ${width / scale} ${height / scale}`}
+        viewBox={`${Math.round(-translate[0] / scale)} ${Math.round(-translate[1] / scale)} ${Math.round(width / scale)} ${Math.round(height / scale)}`}
         onWheel={onWheel}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseLeave}
         onMouseMove={onMouseMove}
-        class={`${props.class} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        class={`${props.class ?? ""} ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
     > 
         {children}
     </svg>
