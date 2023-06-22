@@ -11,7 +11,6 @@ const selectConnectionOptions = (state : ReturnType<typeof URLStore["get"]>) : s
 export default function MapRoute() {
     const connectionURL = useURLStore(selectConnectionOptions);
     const status = usePlayerStore(state => state.status);
-    // const players = usePlayerStore(state => Array.from(state.players.values()));
 
     useEffect(() => {
         PlayerStore.actions.connect(connectionURL);
