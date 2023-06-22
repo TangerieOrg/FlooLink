@@ -120,16 +120,18 @@ namespace FlooLink
         public static void BroadcastPlayerPositions() {
             // Dont broadcast empty positions
             if(PlayerIDManager.IDToUsername.Count() == 0) return;
-            byte[] msg = new byte[1 + 14 * PlayerIDManager.IDToUsername.Count()];
+            byte[] msg = new byte[1 + 18 * PlayerIDManager.IDToUsername.Count()];
             msg[0] = (byte)SendMessageType.Position;
             int offset = 1;
             foreach(var id in PlayerIDManager.GetIDEnumerator()) {
                 BitConverter.GetBytes(id).CopyTo(msg, offset);
                 var pos = PlayerIDManager.GetPosition(id);
-                BitConverter.GetBytes(pos.X).CopyTo(msg, offset + 2);
-                BitConverter.GetBytes(pos.Y).CopyTo(msg, offset + 6);
-                BitConverter.GetBytes(pos.Z).CopyTo(msg, offset + 10);
-                offset += 14;
+                var data = PlayerIDManager.GetPlayerInternal(id).LastMovement.Move;
+                BitConverter.GetBytes(data.Position.X).CopyTo(msg, offset + 2);
+                BitConverter.GetBytes(data.Position.Y).CopyTo(msg, offset + 6);
+                BitConverter.GetBytes(data.Position.Z).CopyTo(msg, offset + 10);
+                BitConverter.GetBytes(data.Direction).CopyTo(msg, offset + 14);
+                offset += 18;
             }
             Self.Sessions.Broadcast(msg);
         }

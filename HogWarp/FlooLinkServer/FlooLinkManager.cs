@@ -6,10 +6,13 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using WebSocketSharp.Net;
 
+
 namespace FlooLink
 {
 
     public class Manager {
+        public const double UpdatesPerSecond = 3;
+        private const int tickMod = (int)(30 / UpdatesPerSecond);
         public Server server;
 
         public WebSocketServer ws;
@@ -64,7 +67,7 @@ namespace FlooLink
 
         public unsafe void Update(float deltaSeconds)
         {
-            if(ticks % 10 == 0) {
+            if(ticks % tickMod == 0) {
                 MapServer.BroadcastPlayerPositions();
             }
             ticks++;

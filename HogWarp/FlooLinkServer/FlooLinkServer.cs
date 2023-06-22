@@ -15,9 +15,9 @@ namespace FlooLink
 
         public string Description => "Proximity Chat";
 
-        public static Server? _server;
+        public static Server _server;
 
-        public static Manager? manager;
+        public static Manager manager;
 
         public void Initialize(Server server)
         {
