@@ -54,6 +54,7 @@ export default function SVGPanZoom({children, width, height, config: {initialSca
         setIsDragging(true);
         setTranslateStart([translate[0], translate[1]]);
         setScreenMouseStart([ev.clientX, ev.clientY]);
+        console.log(getSVGXY(ev.clientX, ev.clientY, translate, scale));
     }
 
     const onMouseUp : MouseEventHandler = useCallback<MouseEventHandler>(ev => {
