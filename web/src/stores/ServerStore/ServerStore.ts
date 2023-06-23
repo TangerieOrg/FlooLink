@@ -4,17 +4,22 @@ import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
 import SimplePeer from "simple-peer";
 import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
+import {createInitiatorPeer, createRecieverPeer} from "@modules/PeerUtils"
 
 interface UserData {
     username : string;
     position: Float32Array;
 }
 
+interface UserPeerInfo {
+    UserPeer: SimplePeer.Instance;
+}
+
 interface State {
     status: ConnectionStatus;
     users: Map<number, UserData>;
     opts: ServerInitOptions;
-    peers: Map<string, SimplePeer.SimplePeer>;
+    peers: Map<number, UserPeerInfo>;
 }
 
 const initial  = () : State => ({
@@ -117,44 +122,48 @@ const messageFns : Record<ServerMessageType, (data : Uint8Array) => void> = {
     [ServerMessageType.PlayerList]: data => {
         // createInitiatorPeer for each player
         const players = toStringArray(data);
+
         set(state => {
             state.users.clear();
+            state.peers.clear();
+
             for(const p of players) {
                 state.users.set(p.charCodeAt(0), {
                     username: p.slice(1),
                     position: new Float32Array([0, 0, 0])
                 });
+                state.peers.set(p.charCodeAt(0),{
+                    UserPeer: createInitiatorPeer()
+                });
             }
-            // state.users = players;
-            // state.users = new Set(players.map(x => x.slice(1)));
+
         });
         ws!.send(decoder.decode(new Uint8Array([ClientMessageType.SendSignal, 0])) + JSON.stringify({key: "value"}))
     },
     [ServerMessageType.PlayerJoin]: data => {
         // createRecieverPeer for new peer
 
-        // const username = decoder.decode(data);
-        // if(username == get().opts.playerId) return;
         set(state => {
             // state.users.delete(data[0])
             state.users.set(data[0], {
                 username: decoder.decode(data.slice(1)),
                 position: new Float32Array([0, 0, 0])
             })
+            state.peers.set(data[0],{
+                UserPeer: createRecieverPeer()
+            });
         })
     },
+
     [ServerMessageType.PlayerLeave]: data => {
         // Remove peer
         set(state => {
             state.users.delete(data[0])
+            state.peers.delete(data[0])
         })
     },
+
     [ServerMessageType.Position]: data => {
-        // 357728 -448836 -82809
-        // new Float32Array(data.slice(1).buffer)
-        // Per player = 13 bytes
-        // data[0] = ID
-        // data[1:12] = X, Y, Z (3 Float32s)
         const numPlayers = data.length / 13;
         for(let i = 0; i < numPlayers; i++) {
             const id = data[i * 13];

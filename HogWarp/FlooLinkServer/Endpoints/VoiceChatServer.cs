@@ -6,6 +6,7 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using WebSocketSharp.Net;
 using System.Text;
+using System.Numerics;
 
 /*
 Discord Usernames:
@@ -22,7 +23,7 @@ namespace FlooLink
     public class VoiceChatServer : CommandServerBase
     {
         public static Map<string, string> UsernameToSessionID = new Map<string, string>();
-        // public static Map<byte, string> ShortIDtoUsername = new Map<byte, string>();
+        public static Map<byte, string> ShortIDtoUsername = new Map<byte, string>();
         // public static List<byte> freeIds = Enumerable.Range(0,255).Select(i => (byte)i).ToList();
 
         private string username;
@@ -63,8 +64,18 @@ namespace FlooLink
             
             // Check if player is on server
             server.Information($"Connection Opened {shortId} {username}");
-            // Send(MessageHelper.stringToBytes(SendMessageType.Test, username));
-            
+            ShortIDtoUsername.Add(Convert.ToByte(shortId), username);
+
+            SendCommand(
+                SendMessageType.PlayerList, 
+                MessageHelper.createPlayerToNameBytes(manager.playersInVoice, ShortIDtoUsername)
+            );
+            BroadcastCommand(
+                SendMessageType.PlayerJoin,
+                MessageHelper.stringToBytes(BitConverter.GetBytes(shortId), username)
+            );
+            //Send(MessageHelper.stringToBytes(SendMessageType.PlayerJoin, username));
+
         }
 
         protected override void OnClose (CloseEventArgs e) {
@@ -75,6 +86,9 @@ namespace FlooLink
             );
             manager.playersInVoice.Remove(username);
             UsernameToSessionID.RemoveReverse(ID);
+            manager.playersRequestedJoin.Remove(username);
+            ShortIDtoUsername.Remove(Convert.ToByte(shortId), username);    
+
         }
 
         protected override void OnError(WebSocketSharp.ErrorEventArgs e)

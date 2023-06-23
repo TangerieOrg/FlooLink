@@ -5,7 +5,7 @@ import {
 import FourOhFour from "./FourOhFour";
 import ServerSelectRoute from "./ServerSelect";
 import MapRoute from "./Map";
-import VoipRoute from "./voip";
+import VoipRoute from "./Voip";
 // import VoiceChatRoute from "./VoiceChat";
 // import TestPeerRoute from "./TestPeer";
 
