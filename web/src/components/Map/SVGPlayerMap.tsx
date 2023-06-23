@@ -47,7 +47,7 @@ export default function SVGPlayerMap(props : JSX.SVGAttributes<SVGSVGElement>) {
         return () => window.removeEventListener("resize", cb);
     }, []);
 
-    return <SVGPanZoom {...props} width={width} height={height} config={config}>
+    return <SVGPanZoom {...props} width={width} height={height} config={config} class={`bg-[#323232] ${props.class}`}>
         {
             tiles.map((row, y)  => <>
                 {
