@@ -10,6 +10,7 @@ import {enableMapSet} from "immer"
 // Must be called before other imports
 enableMapSet();
 
+import "@babylonjs/loaders/glTF";
 
 import { BrowserRouter } from "react-router-dom";
 import { render } from "preact";

@@ -2,8 +2,7 @@ import { createStore, createUseStore } from "@tangerie/better-global-store"
 import { isEqual, pick } from "lodash";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "preact/hooks";
-
-const BASE_URL = process.env.APP_BASE_URL ?? "/";
+import { BASE_URL } from "../Config";
 
 function toQueryString(data : Record<string, any>) {
     const params = new URLSearchParams();
