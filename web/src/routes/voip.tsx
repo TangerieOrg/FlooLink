@@ -30,7 +30,7 @@ export default function VoipRoute() {
                 video: false,
                 audio: true
              }).then((stream) => {
-                ref.current!.srcObject = stream;
+                ref.current!.srcObject = stream; // TODO: Pass stream to current user Peer mapping Peer via Id same from server should match
                 console.log(ref.current!.volume);
                 ref.current!.volume = 0.1;
              })
@@ -41,7 +41,7 @@ export default function VoipRoute() {
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Voip Test: {status}</h1>
         {
-             Array.from(users.values()).filter(u => u.username !== me.username).map(({username, position}) => <span class="text-xl text-center">{username} [{position.map(x => Math.round(x/900)).toString()}] Volume = {Math.round(calcVolumeMult(new Float32Array([357904,-448904,-82809]), position) * 100)}%</span>)
+             Array.from(users.values()).filter(u => u.username !== "").map(({username, position}) => <span class="text-xl text-center">{username} [{position.map(x => Math.round(x/900)).toString()}] Volume = {Math.round(calcVolumeMult(new Float32Array([357904,-448904,-82809]), position) * 100)}%</span>)
         }
         {
             <video ref={ref} autoPlay playsInline/>

@@ -24,7 +24,6 @@ namespace FlooLink
     {
         public static Map<string, string> UsernameToSessionID = new Map<string, string>();
         public static Map<byte, string> ShortIDtoUsername = new Map<byte, string>();
-        // public static List<byte> freeIds = Enumerable.Range(0,255).Select(i => (byte)i).ToList();
 
         private string username;
         private ushort shortId;
@@ -52,15 +51,6 @@ namespace FlooLink
 
             manager.playersRequestedJoin.Remove(username);
             manager.playersInVoice.Add(username);
-
-            // SendCommand(
-            //     SendMessageType.PlayerList, 
-            //     MessageHelper.createPlayerToNameBytes(manager.playersInVoice, ShortIDtoUsername)
-            // );
-            // BroadcastCommand(
-            //     SendMessageType.PlayerJoin,
-            //     MessageHelper.stringToBytes(shortId, username)
-            // );
             
             // Check if player is on server
             server.Information($"Connection Opened {shortId} {username}");
@@ -74,8 +64,7 @@ namespace FlooLink
                 SendMessageType.PlayerJoin,
                 MessageHelper.stringToBytes(BitConverter.GetBytes(shortId), username)
             );
-            //Send(MessageHelper.stringToBytes(SendMessageType.PlayerJoin, username));
-
+            
         }
 
         protected override void OnClose (CloseEventArgs e) {
