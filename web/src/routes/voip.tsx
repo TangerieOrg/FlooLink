@@ -23,6 +23,7 @@ export default function VoipRoute() {
         return () => ServerStore.actions.disconnect();
     }, []);
 
+
     useEffect(() => {
         if(status === "Connected") {
             navigator.mediaDevices.getUserMedia({ 
@@ -32,16 +33,15 @@ export default function VoipRoute() {
                 ref.current!.srcObject = stream;
                 console.log(ref.current!.volume);
                 ref.current!.volume = 0.1;
-                
              })
         }
-    }, [status]);
+    }, [status,me]); // funny add ( me ) here fixes a issue with volume but, creates a error :shrug:
 
 
     return <div class="min-h-screen w-full flex flex-col justify-center">
         <h1 class="text-2xl text-center mb-8">Voip Test: {status}</h1>
         {
-            
+             Array.from(users.values()).filter(u => u.username !== me.username).map(({username, position}) => <span class="text-xl text-center">{username} [{position.map(x => Math.round(x/900)).toString()}] Volume = {Math.round(calcVolumeMult(new Float32Array([357904,-448904,-82809]), position) * 100)}%</span>)
         }
         {
             <video ref={ref} autoPlay playsInline/>
