@@ -1,1 +1,2 @@
 export const isDebugMode = !(window.localStorage.getItem("debug") === "false") && (process.env.NODE_ENV === "development" || window.localStorage.getItem("debug") === "true");
+export const BASE_URL = process.env.APP_BASE_URL ?? "/";
