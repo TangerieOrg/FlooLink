@@ -1,16 +1,19 @@
 import { createStore, createUseStore } from "@tangerie/better-global-store";
 import { isDebugMode } from "../../Config";
 import { DebugLog } from "@modules/Debug";
+import { ServerInitOptions } from "@stores/ServerStore/types"; // might need this or not ( though helps with configuration )
 import { ClientMessageType, ConnectionStatus, ServerMessageType } from "@MyTypes/SocketTypes";
+import {createInitiatorPeer, createRecieverPeer} from "@modules/PeerUtils"
 import { Unreal } from "@MyTypes/Unreal";
 import { valueToKey } from "./Util";
+import SimplePeer from "simple-peer";
 
 export interface PlayerState {
     username: string;
     id: number;
     move: Unreal.Move;
-    // position: Unreal.Vector3;
     info: Unreal.CharacterInfo;
+    peer: SimplePeer.Instance; 
 }
 
 interface State {
@@ -37,6 +40,15 @@ export const PlayerStore = createStore({
             ws = new WebSocket(`${url}/map`);
             ws.binaryType = "arraybuffer";
 
+            setupSocket();
+        },
+        connectVC(state, url:string, playerId: string){
+            if (state.status === "Connected" || state.status === "Connecting") {
+                console.error("Socket already connecting");
+                return;
+            }
+
+            ws = new WebSocket(`${url}/vc?playerId=${playerId}`);
             setupSocket();
         },
         disconnect(state) {
@@ -144,7 +156,8 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                         direction: 0,
                         position: [0, 0, 0]
                     },
-                    info
+                    info,
+                    peer: createInitiatorPeer()
                 })
             }
         })
@@ -165,7 +178,8 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
                     direction: 0,
                     position: [0, 0, 0]
                 },
-                info
+                info,
+                peer: createRecieverPeer()
             })
         });
     },
@@ -203,3 +217,5 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
         })
     }
 }
+
+export const selectByUsername = (username : string) => (state : State) => [...state.players.values()].find(x => x.username === username)!
