@@ -11,7 +11,7 @@ namespace FlooLink
 {
 
     public class Manager {
-        public const double UpdatesPerSecond = 10;
+        public const double UpdatesPerSecond = 5;
         private const int tickMod = (int)(30 / UpdatesPerSecond);
         public Server server;
 
