@@ -189,7 +189,6 @@ const messageFns: Partial<Record<ServerMessageType, (data: ArrayBuffer) => void>
         COUNT = Length / DATA_SIZE_BYTES
         */
         const count = data.byteLength / DATA_SIZE_BYTES;
-        // const count = data.byteLength / 18;
         const ids = new Uint16Array(data, 0, count);
         // id = 2 bytes
         const positions = new Float32Array(data.slice(count * 2));

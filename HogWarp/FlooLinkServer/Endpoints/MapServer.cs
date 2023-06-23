@@ -82,7 +82,7 @@ namespace FlooLink
                 addPlayerInfo(pair.Item1, ref infoBytes);
             }
             #if DEBUG
-            msg.AddRange(BitConverter.GetBytes((ushort)(255)));
+            msg.AddRange(BitConverter.GetBytes(Convert.ToUInt16(255)));
             infoBytes.Add((byte)0);
             infoBytes.Add((byte)0);
             var nameBytes = MessageHelper.stringToBytes("TestPlayer");
@@ -135,22 +135,23 @@ namespace FlooLink
             
             // Dont broadcast empty positions
             #if DEBUG
-            byte[] msg = new byte[1 + 18 * (PlayerIDManager.IDToUsername.Count() + 1)];
+            int count = PlayerIDManager.IDToUsername.Count() + 1;
             #else
+            int count = PlayerIDManager.IDToUsername.Count();
             if(PlayerIDManager.IDToUsername.Count() == 0) return;
-            byte[] msg = new byte[1 + 18 * PlayerIDManager.IDToUsername.Count()];
             #endif
+            byte[] msg = new byte[1 + 18 * count];
             msg[0] = (byte)SendMessageType.Position;
-            int offset = 1;
+            int i = 0;
             foreach(var id in PlayerIDManager.GetIDEnumerator()) {
-                BitConverter.GetBytes(id).CopyTo(msg, offset);
+                BitConverter.GetBytes(id).CopyTo(msg, 1 + i * 2);
                 var pos = PlayerIDManager.GetPosition(id);
                 var data = PlayerIDManager.GetPlayerInternal(id).LastMovement.Move;
-                BitConverter.GetBytes(data.Position.X).CopyTo(msg, offset + 2);
-                BitConverter.GetBytes(data.Position.Y).CopyTo(msg, offset + 6);
-                BitConverter.GetBytes(data.Position.Z).CopyTo(msg, offset + 10);
-                BitConverter.GetBytes(data.Direction).CopyTo(msg, offset + 14);
-                offset += 18;
+                BitConverter.GetBytes(data.Position.X).CopyTo(msg, 1 + count * 2 + i * 16);
+                BitConverter.GetBytes(data.Position.Y).CopyTo(msg, 1 + count * 2 + i * 16 + 4);
+                BitConverter.GetBytes(data.Position.Z).CopyTo(msg, 1 + count * 2 + i * 16 + 8);
+                BitConverter.GetBytes(data.Direction).CopyTo(msg, 1 + count * 2 + i * 16 + 12);
+                i++;
             }
             #if DEBUG
             {
@@ -159,12 +160,12 @@ namespace FlooLink
                 float x = 357728 + (float)Math.Cos(angle) * 20000f;
                 float y = -448836 + (float)Math.Sin(angle) * 20000f;
                 float z = -82809;
-                BitConverter.GetBytes((ushort)255).CopyTo(msg, offset);
+                BitConverter.GetBytes(Convert.ToUInt16(255)).CopyTo(msg, 1 + i * 2);
                 // 357728 -448836 -82809
-                BitConverter.GetBytes(x).CopyTo(msg, offset + 2);
-                BitConverter.GetBytes(y).CopyTo(msg, offset + 6);
-                BitConverter.GetBytes(z).CopyTo(msg, offset + 10);
-                BitConverter.GetBytes((float)(Manager.Ticks % 360 - 180)).CopyTo(msg, offset + 14);
+                BitConverter.GetBytes(x).CopyTo(msg, 1 + count * 2 + i * 16);
+                BitConverter.GetBytes(y).CopyTo(msg, 1 + count * 2 + i * 16 + 4);
+                BitConverter.GetBytes(z).CopyTo(msg, 1 + count * 2 + i * 16 + 8);
+                BitConverter.GetBytes((float)(Manager.Ticks % 360 - 180)).CopyTo(msg, 1 + count * 2 + i * 16 + 12);
             }
             #endif
             Self.Sessions.Broadcast(msg);
