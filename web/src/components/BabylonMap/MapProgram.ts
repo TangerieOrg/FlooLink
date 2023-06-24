@@ -1,7 +1,7 @@
 import { GLTFFileLoader } from "@babylonjs/loaders/glTF";
 GLTFFileLoader.IncrementalLoading = false;
 
-import { ArcRotateCamera, Engine, HemisphericLight, AssetsManager, Scene, Vector3, SceneLoader, ISceneLoaderProgressEvent } from "@babylonjs/core";
+import { ArcRotateCamera, Engine, HemisphericLight, AssetsManager, Scene, Vector3, SceneLoader, ISceneLoaderProgressEvent, ShadowGenerator, DirectionalLight, ImageProcessingConfiguration } from "@babylonjs/core";
 import { IProgram } from "@modules/Babylon/BabylonCanvas";
 import { DebugLog } from "@modules/Debug";
 import { ImportOverlandMap, OverlandMap } from "@assets/map/OverlandMap";
@@ -37,6 +37,9 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
         scene.pointerMovePredicate = () => false;
         scene.pointerDownPredicate = () => false;
         scene.pointerUpPredicate = () => false;
+
+        scene.imageProcessingConfiguration.toneMappingEnabled = true;
+        scene.imageProcessingConfiguration.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
     }
 
     onLoad() {
@@ -45,7 +48,7 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
         // camera.lowerRadiusLimit = 10;
         // camera.upperRadiusLimit = 100;
         
-        const sun = new HemisphericLight("Sun", new Vector3(0, 1, 0), scene);
+        
         requestAnimationFrame(() => {
             this.loadMap();
         });
@@ -56,13 +59,23 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
             if(p.total === 0) this.emit("progress", p.loaded / 1024 / 1024);
             else this.emit("progress", p.loaded/p.total)
         });   
+        const d = new DirectionalLight("Test", new Vector3(0, -1, 1), this.scene);
+        d.intensity = 5;
+        const s = new ShadowGenerator(4096, d)
         // console.log(result);
-        result.meshes.forEach(m => {
+        this.scene.meshes.forEach(m => {
             m.freezeWorldMatrix();
             m.isPickable = false;
             m.doNotSyncBoundingInfo = true;
+            m.receiveShadows = true;
+            s.addShadowCaster(m, true);
             if(m.name === "__root__") this.scene.removeMesh(m)
         });
+        this.scene.materials.forEach(m => {
+            m.needDepthPrePass = true;
+        })
+        // const sun = new HemisphericLight("Sun", new Vector3(0, 1, 0), this.scene);
+        
 
         this.scene.clearCachedVertexData();
         this.camera.focusOn(result.meshes,false);
