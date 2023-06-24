@@ -1,9 +1,10 @@
 module.exports = {
     globDirectory: "dist",
     globPatterns: [
-        "**/*.{webp,html,js,css,png,svg,jpg,gif,json,woff,woff2,eot,ico,webmanifest,map}"
+        "**/*.{glb,webp,html,js,css,png,svg,jpg,gif,json,woff,woff2,eot,ico,webmanifest,map}"
     ],
     swDest: "dist/service-worker.js",
     clientsClaim: true,
-    skipWaiting: true
+    skipWaiting: true,
+    maximumFileSizeToCacheInBytes: Math.pow(2 * 10, 8)
 };
