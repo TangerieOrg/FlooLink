@@ -1,7 +1,10 @@
-import { ArcRotateCamera, Engine, HemisphericLight, MeshBuilder, Scene, Vector3, SceneLoader, ISceneLoaderProgressEvent } from "@babylonjs/core";
+import { GLTFFileLoader } from "@babylonjs/loaders/glTF";
+GLTFFileLoader.IncrementalLoading = false;
+
+import { ArcRotateCamera, Engine, HemisphericLight, AssetsManager, Scene, Vector3, SceneLoader, ISceneLoaderProgressEvent } from "@babylonjs/core";
 import { IProgram } from "@modules/Babylon/BabylonCanvas";
 import { DebugLog } from "@modules/Debug";
-import { ImportOverlandMap } from "@assets/map/OverlandMap";
+import { ImportOverlandMap, OverlandMap } from "@assets/map/OverlandMap";
 import EventEmitter from "@tangerie/event-emitter";
 import { KeyMouseStore, Keys } from "@stores/KeyMouseStore";
 import { isDebugMode } from "../../Config";
@@ -16,10 +19,12 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
     engine : Engine;
     canvas : HTMLCanvasElement;
     camera : ArcRotateCamera;
+    assetManager : AssetsManager;
 
     constructor(scene : Scene) {
         super();
         this.scene = scene;
+        this.assetManager = new AssetsManager(scene);
 
         this.engine = scene.getEngine();
         this.canvas = this.engine.getRenderingCanvas()!;
@@ -41,14 +46,16 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
         // camera.upperRadiusLimit = 100;
         
         const sun = new HemisphericLight("Sun", new Vector3(0, 1, 0), scene);
-        
         requestAnimationFrame(() => {
             this.loadMap();
         });
     }
 
     private async loadMap() {
-        const result = await ImportOverlandMap(this.scene, p => this.emit("progress", p.loaded/p.total));   
+        const result = await ImportOverlandMap(this.scene, p => {
+            if(p.total === 0) this.emit("progress", p.loaded / 1024 / 1024);
+            else this.emit("progress", p.loaded/p.total)
+        });   
         // console.log(result);
         result.meshes.forEach(m => {
             m.freezeWorldMatrix();
@@ -58,7 +65,7 @@ export default class MapProgram extends EventEmitter<MapEvents> implements IProg
         });
 
         this.scene.clearCachedVertexData();
-        this.camera.focusOn(result.meshes);
+        this.camera.focusOn(result.meshes,false);
         this.emit("load");
     }
 
