@@ -2,6 +2,7 @@ import { PlayerStore, usePlayerStore } from "@stores/PlayerStore"
 import { URLStore, useURLStore } from "@stores/URLStore";
 import { useEffect } from "preact/hooks";
 
+
 import BabylonMap from "@components/BabylonMap/BabylonMap";
 
 const selectConnectionOptions = (state : ReturnType<typeof URLStore["get"]>) : string => (
